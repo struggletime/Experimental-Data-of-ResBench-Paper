@@ -1,0 +1,83 @@
+{
+  "historyName" : "smallbank_DB-X-4gbSharedBuffer-500__smallbank-100k__15-conn-exhaust_20261109_000741",
+  "runId" : "smallbank_DB-X-4gbSharedBuffer-500__smallbank-100k__15-conn-exhaust_20261109_000741",
+  "testSuite" : "smallbank",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "DB-X-4gbSharedBuffer-500", "smallbank-100k", "15-conn-exhaust" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/matrix-DB-X-smallbank.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1794154061060,
+  "workload" : {
+    "name" : "smallbank",
+    "params" : {
+      "accountsNum" : "2000",
+      "terminals" : "200",
+      "duration" : "320"
+    }
+  },
+  "database" : {
+    "dbType" : "DB-X",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "DB-X",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1794154061060,
+      "source" : "agent",
+      "host" : {
+        "cpuCount" : 160,
+        "memoryBytes" : 540563824640
+      },
+      "container" : {
+        "available" : true,
+        "name" : "DB-X",
+        "image" : "enmotech/DB-X:5.0.3",
+        "status" : "running",
+        "cpuLimit" : 32.0,
+        "memoryLimitBytes" : 42949672960,
+        "cpuShares" : null,
+        "pidsLimit" : null
+      },
+      "available" : true
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.connection.limit.exceeded",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "attempted-connections" : "800",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.connection.limit.exceeded",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "attempted-connections" : "800",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.connection.limit.exceeded",
+    "groupKey" : "group-3",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "attempted-connections" : "800",
+      "duration" : "60"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : true,
+    "load" : true,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1794154632258
+}

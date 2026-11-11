@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration xmlns:xi="http://www.w3.org/2001/XInclude">
+  <nodes>
+    <node>jdbc:mysql://192.168.199.209:3305/resbench_demo</node>
+  </nodes>
+  <reconnectOnConnectionFailure>true</reconnectOnConnectionFailure>
+  <isolation>TRANSACTION_READ_COMMITTED</isolation>
+  <batchsize>128</batchsize>
+  <scalefactor>100</scalefactor>
+  <data_cktype>ONLY_SPECIAL</data_cktype>
+  <terminals>200</terminals>
+  <faultCases>
+    <case>
+      <id>1</id>
+      <description>Network Delay</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>create</arg>
+        <arg>network</arg>
+        <arg>delay</arg>
+        <arg>--time</arg>
+        <arg>200</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>destroy</arg>
+        <arg>network</arg>
+        <arg>delay</arg>
+        <arg>--time</arg>
+        <arg>200</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+      </recovery>
+      <autoRecovery>1</autoRecovery>
+    </case>
+    <case>
+      <id>2</id>
+      <description>File Move</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>create</arg>
+        <arg>file</arg>
+        <arg>move</arg>
+        <arg>--filepath</arg>
+        <arg>/var/lib/mysql/client-cert.pem</arg>
+        <arg>--target</arg>
+        <arg>/var/lib/mysql/sys</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <check>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/bin/sh</arg>
+        <arg>-c</arg>
+        <arg>probe() {
+  out=$(stat -c '%d:%i' "$1" 2&gt;&amp;1)
+  if [ $? -eq 0 ]; then printf '%s' "$out"; return; fi
+  case "$out" in
+    *ermission?denied*) printf 'unreadable' ;;
+    *) printf 'absent' ;;
+  esac
+}
+src='/var/lib/mysql/client-cert.pem'
+dst_dir='/var/lib/mysql/sys'
+dst="${dst_dir%/}/$(basename "$src")"
+s=$(probe "$src")
+d=$(probe "$dst")
+if [ "$s" = unreadable ] || [ "$d" = unreadable ]; then
+  echo "self-check cannot read path (permission denied): src=$s dst=$d" &gt;&amp;2
+  exit 2
+fi
+dest=false; [ "$d" != absent ] &amp;&amp; dest=true
+moved=false; if [ "$d" != absent ] &amp;&amp; [ "$s" != "$d" ]; then moved=true; fi
+if [ "$moved" = true ]; then
+  summary='源位置已不是原对象，目标目录里存在移动后的对象'
+elif [ "$d" = absent ]; then
+  summary='目标目录里没有该对象，移动没有发生'
+else
+  summary='目标目录里没有该对象，源位置仍是原对象'
+fi
+printf '{"enforced": %s, "summary": "%s", "checks": [{"name": "dest_exists", "observed": "%s", "expected": "present", "matched": %s}, {"name": "src_is_not_the_moved_object", "observed": "%s", "expected": "absent or different inode", "matched": %s}]}\n' \
+  "$moved" "$summary" "$d" "$dest" "$s" "$moved"</arg>
+      </check>
+      <autoRecovery>1</autoRecovery>
+    </case>
+  </faultCases>
+  <works xml:base="../tpcc-worker-tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000251_20261104_190802.xml">
+    <work arrival="REGULAR">
+      <time>145</time>
+      <rate>100000</rate>
+      <weights>45,43,4,4,4</weights>
+      <testSuite>base-test-suite1</testSuite>
+    </work>
+  </works>
+  <transactiontypes>
+    <transactiontype>
+      <name>NewOrder</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Payment</name>
+    </transactiontype>
+    <transactiontype>
+      <name>OrderStatus</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Delivery</name>
+    </transactiontype>
+    <transactiontype>
+      <name>StockLevel</name>
+    </transactiontype>
+  </transactiontypes>
+</configuration>

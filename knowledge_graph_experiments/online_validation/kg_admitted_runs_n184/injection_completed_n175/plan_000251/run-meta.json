@@ -1,0 +1,64 @@
+{
+  "historyName" : "tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000251_20261104_190802",
+  "runId" : "tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000251_20261104_190802",
+  "testSuite" : "tpcc",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "mysql-2gbSharedBuffer-1000", "tpcc-10w", "plan-000251" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/plan300-mysql-tpcc-retest.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1793790482246,
+  "workload" : {
+    "name" : "tpcc",
+    "params" : {
+      "warehouses" : "100",
+      "concurrency" : "200",
+      "reload" : "false",
+      "duration" : "145"
+    }
+  },
+  "database" : {
+    "dbType" : "mysql",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "mysql8",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1793790482246,
+      "source" : "agent",
+      "available" : false,
+      "error" : "资源采集失败：Connect timed out"
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.network.delay",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "planningSeconds" : 35,
+    "params" : {
+      "time" : "200",
+      "interface" : "ens17f0",
+      "duration" : "30"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.disk.filemove",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "planningSeconds" : 95,
+    "params" : {
+      "src-path" : "/var/lib/mysql/client-cert.pem",
+      "dst-dir" : "/var/lib/mysql/sys",
+      "duration" : "30"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : false,
+    "load" : false,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1793790684011
+}

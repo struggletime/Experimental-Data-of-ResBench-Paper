@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testSuites>
+  <testSuite name="base-test-suite1">
+    <case id="8">
+      <description>File Move</description>
+      <planning>30</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="4">
+      <description>Network Reorder</description>
+      <planning>60</planning>
+      <during>30</during>
+      <groupKey>group-2</groupKey>
+    </case>
+    <case id="10">
+      <description>Disk Fill</description>
+      <planning>90</planning>
+      <during>30</during>
+      <groupKey>group-3</groupKey>
+    </case>
+  </testSuite>
+</testSuites>

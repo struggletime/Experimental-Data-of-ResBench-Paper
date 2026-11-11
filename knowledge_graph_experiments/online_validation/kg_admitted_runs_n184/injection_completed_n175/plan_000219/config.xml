@@ -1,0 +1,350 @@
+<?xml version='1.0' encoding='utf-8'?>
+<configuration>
+  <nodes>
+    <node>jdbc:mysql://192.168.199.209:3305/resbench_demo</node>
+  </nodes>
+  <reconnectOnConnectionFailure>true</reconnectOnConnectionFailure>
+  <isolation>TRANSACTION_READ_COMMITTED</isolation>
+  <batchsize>128</batchsize>
+  <scalefactor>100</scalefactor>
+  <data_cktype>ONLY_SPECIAL</data_cktype>
+  <terminals>200</terminals>
+  <faultCases>
+    <case>
+      <id>1</id>
+      <description>Network Reorder</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>create</arg>
+        <arg>network</arg>
+        <arg>reorder</arg>
+        <arg>--correlation</arg>
+        <arg>80</arg>
+        <arg>--percent</arg>
+        <arg>50</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+        <arg>--time</arg>
+        <arg>500</arg>
+        <arg>--gap</arg>
+        <arg>2</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>destroy</arg>
+        <arg>network</arg>
+        <arg>reorder</arg>
+        <arg>--correlation</arg>
+        <arg>80</arg>
+        <arg>--percent</arg>
+        <arg>50</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+        <arg>--time</arg>
+        <arg>500</arg>
+        <arg>--gap</arg>
+        <arg>2</arg>
+      </recovery>
+      <check>
+        <cmd>/bin/sh</cmd>
+        <arg>-c</arg>
+        <arg>dev='ens17f0'
+want='50'
+tc=/usr/sbin/tc
+[ -x "$tc" ] || tc=tc
+
+stat_of() {
+  printf '%s\n' "$1" | awk '
+    /^qdisc / { netem = ($0 ~ /netem/); next }
+    netem &amp;&amp; $1 == "Sent" {
+      if (match($0, /[0-9]+ pkt/)) pkt += substr($0, RSTART, RLENGTH - 4)
+      if (match($0, /requeues [0-9]+[)]/)) hits += substr($0, RSTART + 9, RLENGTH - 10)
+    }
+    END { printf "%d %d\n", pkt, hits }'
+}
+
+emit() {
+  printf '{"enforced": %s, "summary": "%s", "checks": [{"name": "netem_present", "observed": "%s", "expected": "netem qdisc on %s", "matched": %s}, {"name": "traffic_through_netem", "observed": "%s", "expected": "&gt; 0 pkt in 4s", "matched": %s}, {"name": "reorder_hits", "observed": "%s", "expected": "&gt; 0 in 4s", "matched": %s}, {"name": "reorder_percent", "observed": "%s%%", "expected": "%s%%", "matched": %s}, {"name": "delay_positive", "observed": "%s", "expected": "&gt; 0", "matched": %s}]}\n' \
+    "$enforced" "$summary" "$obs_present" "$dev" "$present_m" "$dp" "$traffic_m" "$dh" "$hits_m" "${got_pct:-unknown}" "$want" "$pct_m" "${delay:-unknown}" "$delay_m"
+}
+
+s1=$("$tc" -s qdisc show dev "$dev" 2&gt;/dev/null)
+if [ -z "$s1" ]; then
+  echo "self-check cannot read qdisc of $dev (tc failed: device missing or no permission)" &gt;&amp;2
+  exit 2
+fi
+
+st=$(stat_of "$s1"); p1=${st% *}; h1=${st#* }
+present=false
+case "$s1" in *"qdisc netem"*) present=true ;; esac
+got_pct=; delay=; p2=$p1; h2=$h1; present2=false; reset=false
+
+if [ "$present" = true ]; then
+  line=$(printf '%s\n' "$s1" | grep -m1 'qdisc netem')
+  got_pct=$(printf '%s\n' "$line" | awk 'match($0, /reorder [0-9.]+%/) { print substr($0, RSTART + 8, RLENGTH - 9); exit }')
+  delay=$(printf '%s\n' "$line" | awk 'match($0, /delay [0-9.]+(us|ms|s)/) { print substr($0, RSTART + 6, RLENGTH - 6); exit }')
+  sleep 4
+  s2=$("$tc" -s qdisc show dev "$dev" 2&gt;/dev/null)
+  case "$s2" in *"qdisc netem"*) present2=true ;; esac
+  st=$(stat_of "$s2"); p2=${st% *}; h2=${st#* }
+fi
+
+dp=$((p2 - p1)); dh=$((h2 - h1))
+if [ "$dp" -lt 0 ] || [ "$dh" -lt 0 ]; then dp=0; dh=0; reset=true; fi
+
+dnum=$(printf '%s' "$delay" | sed 's/[a-z]*$//')
+delay_m=false
+if [ -n "$dnum" ] &amp;&amp; awk -v d="$dnum" 'BEGIN { exit !(d &gt; 0) }'; then delay_m=true; fi
+pct_m=false
+if [ -n "$got_pct" ] &amp;&amp; awk -v a="$got_pct" -v b="$want" 'BEGIN { exit !(a == b) }'; then pct_m=true; fi
+traffic_m=false; [ "$dp" -gt 0 ] &amp;&amp; traffic_m=true
+hits_m=false; [ "$dh" -gt 0 ] &amp;&amp; hits_m=true
+obs_present=absent; [ "$present2" = true ] &amp;&amp; obs_present=present
+present_m=$present2
+
+enforced=false
+if [ "$present2" = true ] &amp;&amp; [ "$traffic_m" = true ] &amp;&amp; [ "$hits_m" = true ] &amp;&amp; [ "$delay_m" = true ] &amp;&amp; [ "$reset" = false ]; then
+  enforced=true
+fi
+
+root_qdisc=$(printf '%s\n' "$s1" | awk 'NR == 1 { print $2 }')
+if [ "$present" = false ]; then
+  summary="网卡 $dev 上没有 netem 规则（root qdisc 仍是 $root_qdisc）：chaosblade 的 tc qdisc add 被已存在的非默认 qdisc 挡住（File exists），注入没有挂上去"
+elif [ "$present2" = false ]; then
+  summary="netem 规则在采样期间消失，注入没有持续生效"
+elif [ "$reset" = true ]; then
+  summary="采样期间 netem 计数被重置（规则被重建），无法确认重排命中"
+elif [ "$dp" -le 0 ]; then
+  summary="netem 已挂在 $dev 上，但 4 秒内没有报文经过（interface 可能配错，流量走的是别的网卡）"
+elif [ "$delay_m" = false ]; then
+  summary="netem 的 delay 是 ${delay:-缺失}，没有时延就没有可打乱的顺序"
+elif [ "$dh" -le 0 ]; then
+  summary="4 秒内有 $dp 个报文经过 netem，但没有报文被判为重排（percent 可能为 0）"
+else
+  summary="netem 在 $dev 上生效：4 秒内 $dp 个报文经过，其中 $dh 个被判为重排（配置 reorder ${got_pct:-?}%）"
+  if awk -v p="$want" 'BEGIN { exit !(p &gt;= 80) }'; then
+    summary="$summary；percent&gt;=80 时对端几乎观察不到真乱序，判读请看 net.qdisc.delay"
+  fi
+fi
+
+emit</arg>
+      </check>
+      <autoRecovery>1</autoRecovery>
+    </case>
+    <case>
+      <id>2</id>
+      <description>Disk Fill</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>create</arg>
+        <arg>disk</arg>
+        <arg>fill</arg>
+        <arg>--path</arg>
+        <arg>/mnt/nvme4n1/mysql_data/data</arg>
+        <arg>--percent</arg>
+        <arg>100</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>destroy</arg>
+        <arg>{{uid}}</arg>
+      </recovery>
+      <autoRecovery>0</autoRecovery>
+    </case>
+    <case>
+      <id>3</id>
+      <description>Process Stop</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>create</arg>
+        <arg>process</arg>
+        <arg>stop</arg>
+        <arg>--process-cmd</arg>
+        <arg>mysqld</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>destroy</arg>
+        <arg>process</arg>
+        <arg>stop</arg>
+        <arg>--process-cmd</arg>
+        <arg>mysqld</arg>
+      </recovery>
+      <check>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/bin/sh</arg>
+        <arg>-c</arg>
+        <arg>want='mysqld'
+total=0; stopped=0; i=0
+while [ "$i" -lt 5 ]; do
+  total=0; stopped=0
+  for d in /proc/[0-9]*; do
+    c=$(cat "$d/comm" 2&gt;/dev/null) || continue
+    [ "$c" = "$want" ] || continue
+    total=$((total + 1))
+    st=$(sed -n 's/^State:[[:space:]]*//p' "$d/status" 2&gt;/dev/null | cut -c1)
+    case "$st" in T|t) stopped=$((stopped + 1)) ;; esac
+  done
+  # 已经有 T 状态进程 → 注入生效；一个匹配进程都没有 → 目标写错，重试也没用
+  if [ "$stopped" -gt 0 ] || [ "$total" -eq 0 ]; then break; fi
+  i=$((i + 1)); sleep 1
+done
+enforced=false; [ "$stopped" -gt 0 ] &amp;&amp; enforced=true
+if [ "$total" -eq 0 ]; then
+  summary='没有找到 comm 等于目标名的进程（process-cmd 写错或进程已退出）'
+elif [ "$enforced" = true ]; then
+  summary='目标进程已进入 T 状态（SIGSTOP 生效）'
+else
+  summary='找到了目标进程，但没有一个处于 T 状态'
+fi
+printf '{"enforced": %s, "summary": "%s", "checks": [{"name": "target_process_in_T_state", "observed": "%s/%s", "expected": "&gt;=1 stopped of matched", "matched": %s}]}\n' \
+  "$enforced" "$summary" "$stopped" "$total" "$enforced"</arg>
+      </check>
+      <autoRecovery>0</autoRecovery>
+    </case>
+    <case>
+      <id>4</id>
+      <description>连接风暴</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection async="true">
+        <cmd>java</cmd>
+        <arg>-jar</arg>
+        <arg>/opt/DBChaos/DBChaos.jar</arg>
+        <arg>--db</arg>
+        <arg>mysql</arg>
+        <arg>session</arg>
+        <arg>max_connection</arg>
+        <arg>-mode</arg>
+        <arg>conn_storm</arg>
+        <arg>-count</arg>
+        <arg>200</arg>
+        <arg>-duration</arg>
+        <arg>30000</arg>
+        <arg>-url</arg>
+        <arg>jdbc:mysql://192.168.199.209:3305/resbench_demo</arg>
+        <arg>-user</arg>
+        <arg>hancz</arg>
+        <arg>-password</arg>
+        <arg>REDACTED</arg>
+      </injection>
+      <check>
+        <cmd>java</cmd>
+        <arg>-jar</arg>
+        <arg>/opt/DBChaos/DBChaos.jar</arg>
+        <arg>--db</arg>
+        <arg>mysql</arg>
+        <arg>check</arg>
+        <arg>max_connection</arg>
+        <arg>-mode</arg>
+        <arg>conn_storm</arg>
+        <arg>-min-sessions</arg>
+        <arg>1</arg>
+        <arg>-url</arg>
+        <arg>jdbc:mysql://192.168.199.209:3305/resbench_demo</arg>
+        <arg>-user</arg>
+        <arg>hancz</arg>
+        <arg>-password</arg>
+        <arg>REDACTED</arg>
+      </check>
+      <autoRecovery>1</autoRecovery>
+    </case>
+    <case>
+      <id>5</id>
+      <description>连接数耗尽</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection async="true">
+        <cmd>java</cmd>
+        <arg>-jar</arg>
+        <arg>/opt/DBChaos/DBChaos.jar</arg>
+        <arg>--db</arg>
+        <arg>mysql</arg>
+        <arg>session</arg>
+        <arg>max_connection</arg>
+        <arg>-mode</arg>
+        <arg>conn_exhaustion</arg>
+        <arg>-count</arg>
+        <arg>400</arg>
+        <arg>-duration</arg>
+        <arg>30000</arg>
+        <arg>-url</arg>
+        <arg>jdbc:mysql://192.168.199.209:3305/resbench_demo</arg>
+        <arg>-user</arg>
+        <arg>hancz</arg>
+        <arg>-password</arg>
+        <arg>REDACTED</arg>
+      </injection>
+      <check>
+        <cmd>java</cmd>
+        <arg>-jar</arg>
+        <arg>/opt/DBChaos/DBChaos.jar</arg>
+        <arg>--db</arg>
+        <arg>mysql</arg>
+        <arg>check</arg>
+        <arg>max_connection</arg>
+        <arg>-mode</arg>
+        <arg>conn_exhaustion</arg>
+        <arg>-min-sessions</arg>
+        <arg>1</arg>
+        <arg>-url</arg>
+        <arg>jdbc:mysql://192.168.199.209:3305/resbench_demo</arg>
+        <arg>-user</arg>
+        <arg>hancz</arg>
+        <arg>-password</arg>
+        <arg>REDACTED</arg>
+      </check>
+      <autoRecovery>1</autoRecovery>
+    </case>
+  </faultCases>
+  <works xml:base="../tpcc-worker-tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000219_20261104_180140.xml">
+    <work arrival="REGULAR">
+      <time>80</time>
+      <rate>100000</rate>
+      <weights>45,43,4,4,4</weights>
+      <testSuite>base-test-suite1</testSuite>
+    </work>
+  </works>
+  <transactiontypes>
+    <transactiontype>
+      <name>NewOrder</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Payment</name>
+    </transactiontype>
+    <transactiontype>
+      <name>OrderStatus</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Delivery</name>
+    </transactiontype>
+    <transactiontype>
+      <name>StockLevel</name>
+    </transactiontype>
+  </transactiontypes>
+</configuration>

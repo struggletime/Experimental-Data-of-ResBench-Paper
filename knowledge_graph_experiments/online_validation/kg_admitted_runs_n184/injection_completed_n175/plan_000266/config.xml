@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration xmlns:xi="http://www.w3.org/2001/XInclude">
+  <nodes>
+    <node>jdbc:mysql://192.168.199.209:3305/resbench_demo</node>
+  </nodes>
+  <reconnectOnConnectionFailure>true</reconnectOnConnectionFailure>
+  <isolation>TRANSACTION_READ_COMMITTED</isolation>
+  <batchsize>128</batchsize>
+  <scalefactor>100</scalefactor>
+  <data_cktype>ONLY_SPECIAL</data_cktype>
+  <terminals>200</terminals>
+  <faultCases>
+    <case>
+      <id>1</id>
+      <description>Network Duplicate</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>create</arg>
+        <arg>network</arg>
+        <arg>duplicate</arg>
+        <arg>--percent</arg>
+        <arg>50</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>destroy</arg>
+        <arg>network</arg>
+        <arg>duplicate</arg>
+        <arg>--percent</arg>
+        <arg>50</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+      </recovery>
+      <autoRecovery>1</autoRecovery>
+    </case>
+    <case>
+      <id>2</id>
+      <description>Process Stop</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>create</arg>
+        <arg>process</arg>
+        <arg>stop</arg>
+        <arg>--process-cmd</arg>
+        <arg>mysqld</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>destroy</arg>
+        <arg>process</arg>
+        <arg>stop</arg>
+        <arg>--process-cmd</arg>
+        <arg>mysqld</arg>
+      </recovery>
+      <check>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/bin/sh</arg>
+        <arg>-c</arg>
+        <arg>want='mysqld'
+total=0; stopped=0; i=0
+while [ "$i" -lt 5 ]; do
+  total=0; stopped=0
+  for d in /proc/[0-9]*; do
+    c=$(cat "$d/comm" 2&gt;/dev/null) || continue
+    [ "$c" = "$want" ] || continue
+    total=$((total + 1))
+    st=$(sed -n 's/^State:[[:space:]]*//p' "$d/status" 2&gt;/dev/null | cut -c1)
+    case "$st" in T|t) stopped=$((stopped + 1)) ;; esac
+  done
+  # 已经有 T 状态进程 → 注入生效；一个匹配进程都没有 → 目标写错，重试也没用
+  if [ "$stopped" -gt 0 ] || [ "$total" -eq 0 ]; then break; fi
+  i=$((i + 1)); sleep 1
+done
+enforced=false; [ "$stopped" -gt 0 ] &amp;&amp; enforced=true
+if [ "$total" -eq 0 ]; then
+  summary='没有找到 comm 等于目标名的进程（process-cmd 写错或进程已退出）'
+elif [ "$enforced" = true ]; then
+  summary='目标进程已进入 T 状态（SIGSTOP 生效）'
+else
+  summary='找到了目标进程，但没有一个处于 T 状态'
+fi
+printf '{"enforced": %s, "summary": "%s", "checks": [{"name": "target_process_in_T_state", "observed": "%s/%s", "expected": "&gt;=1 stopped of matched", "matched": %s}]}\n' \
+  "$enforced" "$summary" "$stopped" "$total" "$enforced"</arg>
+      </check>
+      <autoRecovery>0</autoRecovery>
+    </case>
+    <case>
+      <id>3</id>
+      <description>Network Packet Loss</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>create</arg>
+        <arg>network</arg>
+        <arg>loss</arg>
+        <arg>--percent</arg>
+        <arg>10</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>destroy</arg>
+        <arg>network</arg>
+        <arg>loss</arg>
+        <arg>--percent</arg>
+        <arg>10</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+      </recovery>
+      <autoRecovery>1</autoRecovery>
+    </case>
+  </faultCases>
+  <works xml:base="../tpcc-worker-tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000266_20261104_193825.xml">
+    <work arrival="REGULAR">
+      <time>152</time>
+      <rate>100000</rate>
+      <weights>45,43,4,4,4</weights>
+      <testSuite>base-test-suite1</testSuite>
+    </work>
+  </works>
+  <transactiontypes>
+    <transactiontype>
+      <name>NewOrder</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Payment</name>
+    </transactiontype>
+    <transactiontype>
+      <name>OrderStatus</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Delivery</name>
+    </transactiontype>
+    <transactiontype>
+      <name>StockLevel</name>
+    </transactiontype>
+  </transactiontypes>
+</configuration>

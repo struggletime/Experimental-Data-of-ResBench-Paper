@@ -1,0 +1,70 @@
+[
+    {
+        "value":  [
+                      {
+                          "Fault Name":  "File Move",
+                          "start_ts_milliseconds":  1793803545729,
+                          "duration_milliseconds":  60000,
+                          "stage_end_ts_milliseconds":  1793803635729,
+                          "fault_end_ts_milliseconds":  1793803605729,
+                          "stage_start_ts_milliseconds":  1793803484885,
+                          "data_loss":  0,
+                          "rpo":  100.0,
+                          "outage_seconds":  0,
+                          "rto":  100.0,
+                          "recovery_time_factor":  0,
+                          "throughput_rate":  1,
+                          "throughput":  100.0,
+                          "latency":  90.98,
+                          "stability":  100.0,
+                          "defence":  100.0,
+                          "recovery":  100.0,
+                          "adaptability":  0.0,
+                          "volatility":  0.0
+                      },
+                      {
+                          "Fault Name":  "File Move",
+                          "start_ts_milliseconds":  1793803635729,
+                          "duration_milliseconds":  60000,
+                          "stage_end_ts_milliseconds":  1793803725730,
+                          "fault_end_ts_milliseconds":  1793803695729,
+                          "stage_start_ts_milliseconds":  1793803605729,
+                          "data_loss":  0,
+                          "rpo":  100.0,
+                          "outage_seconds":  0,
+                          "rto":  100.0,
+                          "recovery_time_factor":  0,
+                          "throughput_rate":  1,
+                          "throughput":  100.0,
+                          "latency":  90.78,
+                          "stability":  100.0,
+                          "defence":  100.0,
+                          "recovery":  100.0,
+                          "adaptability":  0.0,
+                          "volatility":  99.96
+                      },
+                      {
+                          "Fault Name":  "File Move",
+                          "start_ts_milliseconds":  1793803725730,
+                          "duration_milliseconds":  60000,
+                          "stage_end_ts_milliseconds":  1793803805210,
+                          "fault_end_ts_milliseconds":  1793803785730,
+                          "stage_start_ts_milliseconds":  1793803695729,
+                          "data_loss":  0,
+                          "rpo":  100.0,
+                          "outage_seconds":  0,
+                          "rto":  100.0,
+                          "recovery_time_factor":  0,
+                          "throughput_rate":  1,
+                          "throughput":  100.0,
+                          "latency":  90.71,
+                          "stability":  100.0,
+                          "defence":  100.0,
+                          "recovery":  100.0,
+                          "adaptability":  0.0,
+                          "volatility":  99.94
+                      }
+                  ],
+        "Count":  3
+    }
+]

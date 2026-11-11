@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testSuites>
+  <testSuite name="base-test-suite1">
+    <case id="1">
+      <description>CPU Load</description>
+      <planning>30</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="3">
+      <description>Network Delay</description>
+      <planning>30</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="8">
+      <description>File Move</description>
+      <planning>30</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="9">
+      <description>File Chmod</description>
+      <planning>30</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="10">
+      <description>Disk Fill</description>
+      <planning>30</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+  </testSuite>
+</testSuites>

@@ -1,0 +1,92 @@
+{
+  "historyName" : "tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000158_20261104_164325",
+  "runId" : "tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000158_20261104_164325",
+  "testSuite" : "tpcc",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "mysql-2gbSharedBuffer-1000", "tpcc-10w", "plan-000158" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/plan300-mysql-tpcc-retest.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1793781805596,
+  "workload" : {
+    "name" : "tpcc",
+    "params" : {
+      "warehouses" : "100",
+      "concurrency" : "200",
+      "reload" : "false",
+      "duration" : "166"
+    }
+  },
+  "database" : {
+    "dbType" : "mysql",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "mysql8",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1793781805596,
+      "source" : "agent",
+      "available" : false,
+      "error" : "资源采集失败：Connect timed out"
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.connection.surge",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "planningSeconds" : 79,
+    "params" : {
+      "concurrent-connections" : "200",
+      "duration" : "30"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.network.duplicate",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "planningSeconds" : 107,
+    "params" : {
+      "percent" : "50",
+      "interface" : "ens17f0",
+      "duration" : "30"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.disk.filechmod",
+    "groupKey" : "group-3",
+    "delaySeconds" : null,
+    "planningSeconds" : 113,
+    "params" : {
+      "filepath" : "/var/lib/mysql/resbench_demo",
+      "mark" : "000",
+      "duration" : "30"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.process.stop",
+    "groupKey" : "group-4",
+    "delaySeconds" : null,
+    "planningSeconds" : 116,
+    "params" : {
+      "process-cmd" : "mysqld",
+      "duration" : "30"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.transaction.massive.rollback",
+    "groupKey" : "group-4",
+    "delaySeconds" : null,
+    "planningSeconds" : 116,
+    "params" : {
+      "threads" : "16",
+      "rollback-rate" : "80",
+      "duration" : "30"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : false,
+    "load" : false,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1793782081220
+}

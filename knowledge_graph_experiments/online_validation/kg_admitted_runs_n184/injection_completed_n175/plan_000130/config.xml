@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration xmlns:xi="http://www.w3.org/2001/XInclude">
+  <nodes>
+    <node>jdbc:mysql://192.168.199.209:3305/resbench_demo</node>
+  </nodes>
+  <reconnectOnConnectionFailure>true</reconnectOnConnectionFailure>
+  <isolation>TRANSACTION_READ_COMMITTED</isolation>
+  <batchsize>128</batchsize>
+  <scalefactor>100</scalefactor>
+  <data_cktype>ONLY_SPECIAL</data_cktype>
+  <terminals>200</terminals>
+  <faultCases>
+    <case>
+      <id>1</id>
+      <description>File Chmod</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>create</arg>
+        <arg>file</arg>
+        <arg>chmod</arg>
+        <arg>--filepath</arg>
+        <arg>/var/lib/mysql/resbench_demo</arg>
+        <arg>--mark</arg>
+        <arg>000</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>destroy</arg>
+        <arg>file</arg>
+        <arg>chmod</arg>
+        <arg>--filepath</arg>
+        <arg>/var/lib/mysql/resbench_demo</arg>
+        <arg>--mark</arg>
+        <arg>000</arg>
+      </recovery>
+      <check>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/bin/sh</arg>
+        <arg>-c</arg>
+        <arg>p='/var/lib/mysql/resbench_demo'
+want='000'
+got=$(stat -c '%a' "$p" 2&gt;&amp;1)
+if [ $? -ne 0 ]; then
+  case "$got" in
+    *ermission?denied*) echo "self-check cannot read $p (permission denied)" &gt;&amp;2; exit 2 ;;
+  esac
+  got=absent
+fi
+origin=$(awk -F: -v k="$p" '$1 == k { print $2 }' /tmp/chaos-file-chmod.tmp 2&gt;/dev/null | tail -n 1)
+# 按八进制数值比，不按字符串比：stat -c '%a' 对 000 只输出 "0"，而 chaosblade 的
+# --mark 必须写成 "000"（写 "0" 会报 illegal mark）；chaosblade 自己记的原始权限
+# 也可能是 "0"/"00"。统一去掉前导 0（"000"→"0"，"0755"→"755"）再比。
+norm_mode() {
+  v=$1
+  while [ "${v#0}" != "$v" ]; do v=${v#0}; done
+  [ -n "$v" ] || v=0
+  printf '%s' "$v"
+}
+got_n=$(norm_mode "$got")
+want_n=$(norm_mode "$want")
+origin_n=$(norm_mode "$origin")
+mode_ok=false; [ "$got_n" = "$want_n" ] &amp;&amp; mode_ok=true
+not_noop=true
+if [ -n "$origin" ] &amp;&amp; [ "$origin_n" = "$want_n" ]; then not_noop=false; fi
+enforced=false
+if [ "$mode_ok" = true ] &amp;&amp; [ "$not_noop" = true ]; then enforced=true; fi
+if [ "$enforced" = true ]; then
+  summary='权限已改成下发值'
+elif [ "$not_noop" = false ]; then
+  summary='注入前权限本来就是该值，chmod 空转'
+else
+  summary='权限仍是原值，chmod 没有生效'
+fi
+printf '{"enforced": %s, "summary": "%s", "checks": [{"name": "mode_equals_mark", "observed": "%s", "expected": "%s", "matched": %s}, {"name": "not_a_noop", "observed": "origin=%s", "expected": "origin differs from mark", "matched": %s}]}\n' \
+  "$enforced" "$summary" "$got" "$want" "$mode_ok" "${origin:-unknown}" "$not_noop"</arg>
+      </check>
+      <autoRecovery>0</autoRecovery>
+    </case>
+    <case>
+      <id>2</id>
+      <description>CPU Load</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>create</arg>
+        <arg>cpu</arg>
+        <arg>fullload</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>destroy</arg>
+        <arg>cpu</arg>
+        <arg>fullload</arg>
+      </recovery>
+      <autoRecovery>0</autoRecovery>
+    </case>
+  </faultCases>
+  <works xml:base="../tpcc-worker-tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000130_20261103_062303.xml">
+    <work arrival="REGULAR">
+      <time>82</time>
+      <rate>100000</rate>
+      <weights>45,43,4,4,4</weights>
+      <testSuite>base-test-suite1</testSuite>
+    </work>
+  </works>
+  <transactiontypes>
+    <transactiontype>
+      <name>NewOrder</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Payment</name>
+    </transactiontype>
+    <transactiontype>
+      <name>OrderStatus</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Delivery</name>
+    </transactiontype>
+    <transactiontype>
+      <name>StockLevel</name>
+    </transactiontype>
+  </transactiontypes>
+</configuration>

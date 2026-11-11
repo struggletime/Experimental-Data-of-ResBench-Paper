@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testSuites>
+  <testSuite name="base-test-suite1">
+    <case id="12">
+      <description>连接风暴</description>
+      <planning>72</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="15">
+      <description>海量事务回滚</description>
+      <planning>75</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="7">
+      <description>Memory Load</description>
+      <planning>113</planning>
+      <during>30</during>
+      <groupKey>group-2</groupKey>
+    </case>
+    <case id="9">
+      <description>File Chmod</description>
+      <planning>117</planning>
+      <during>30</during>
+      <groupKey>group-2</groupKey>
+    </case>
+  </testSuite>
+</testSuites>

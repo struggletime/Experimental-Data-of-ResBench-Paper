@@ -1,0 +1,87 @@
+{
+  "historyName" : "tpcc_DB-X-4gbSharedBuffer-500__tpcc-100warehouse-200concurrency__07-net-corrupt_20261108_203655",
+  "runId" : "tpcc_DB-X-4gbSharedBuffer-500__tpcc-100warehouse-200concurrency__07-net-corrupt_20261108_203655",
+  "testSuite" : "tpcc",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "DB-X-4gbSharedBuffer-500", "tpcc-100warehouse-200concurrency", "07-net-corrupt" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/matrix-DB-X-tpcc.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1794141415651,
+  "workload" : {
+    "name" : "tpcc",
+    "params" : {
+      "warehouses" : "100",
+      "concurrency" : "200",
+      "reload" : "false",
+      "duration" : "320"
+    }
+  },
+  "database" : {
+    "dbType" : "DB-X",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "DB-X",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1794141415651,
+      "source" : "agent",
+      "host" : {
+        "cpuCount" : 160,
+        "memoryBytes" : 540563824640
+      },
+      "container" : {
+        "available" : true,
+        "name" : "DB-X",
+        "image" : "enmotech/DB-X:5.0.3",
+        "status" : "running",
+        "cpuLimit" : 32.0,
+        "memoryLimitBytes" : 42949672960,
+        "cpuShares" : null,
+        "pidsLimit" : null
+      },
+      "available" : true
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.network.corrupt",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "percent" : "80",
+      "interface" : "ens17f0",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.network.corrupt",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "percent" : "80",
+      "interface" : "ens17f0",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.network.corrupt",
+    "groupKey" : "group-3",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "percent" : "80",
+      "interface" : "ens17f0",
+      "duration" : "60"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : false,
+    "load" : false,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1794141854576
+}

@@ -1,0 +1,84 @@
+{
+  "historyName" : "tpcc_pg-2GbSharedbuffer-1000__tpcc-100warehouse-200concurrency__03-net-loss_20261101_173949",
+  "runId" : "tpcc_pg-2GbSharedbuffer-1000__tpcc-100warehouse-200concurrency__03-net-loss_20261101_173949",
+  "testSuite" : "tpcc",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "pg-2GbSharedbuffer-1000", "tpcc-100warehouse-200concurrency", "03-net-loss" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/matrix-pg-tpcc.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1793525989602,
+  "workload" : {
+    "name" : "tpcc",
+    "params" : {
+      "warehouses" : "100",
+      "concurrency" : "200",
+      "reload" : "false",
+      "duration" : "320"
+    }
+  },
+  "database" : {
+    "dbType" : "postgresql",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "pg_tpcc32",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1793525989602,
+      "source" : "agent",
+      "host" : {
+        "cpuCount" : 160,
+        "memoryBytes" : 540563824640
+      },
+      "container" : {
+        "available" : true,
+        "name" : "pg_tpcc32",
+        "image" : "postgres:10",
+        "status" : "running",
+        "cpuLimit" : 32.0,
+        "memoryLimitBytes" : 42949672960,
+        "cpuShares" : null,
+        "pidsLimit" : null
+      },
+      "available" : true
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.network.package",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "params" : {
+      "percent" : "50",
+      "interface" : "ens17f0",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.network.package",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "params" : {
+      "percent" : "50",
+      "interface" : "ens17f0",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.network.package",
+    "groupKey" : "group-3",
+    "delaySeconds" : null,
+    "params" : {
+      "percent" : "50",
+      "interface" : "ens17f0",
+      "duration" : "60"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : false,
+    "load" : false,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1793526483394
+}

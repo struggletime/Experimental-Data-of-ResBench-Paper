@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testSuites>
+  <testSuite name="base-test-suite1">
+    <case id="11">
+      <description>Process Stop</description>
+      <planning>47</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="9">
+      <description>File Chmod</description>
+      <planning>75</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="7">
+      <description>Memory Load</description>
+      <planning>103</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+  </testSuite>
+</testSuites>

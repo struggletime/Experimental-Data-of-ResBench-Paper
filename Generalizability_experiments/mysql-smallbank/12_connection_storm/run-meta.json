@@ -1,0 +1,67 @@
+{
+  "historyName" : "smallbank_mysql-2gbSharedBuffer-1000__smallbank-100k__12-conn-surge_20261101_151341",
+  "runId" : "smallbank_mysql-2gbSharedBuffer-1000__smallbank-100k__12-conn-surge_20261101_151341",
+  "testSuite" : "smallbank",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "mysql-2gbSharedBuffer-1000", "smallbank-100k", "12-conn-surge" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/matrix-mysql-smallbank.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1793517221017,
+  "workload" : {
+    "name" : "smallbank",
+    "params" : {
+      "accountsNum" : "2000",
+      "terminals" : "200",
+      "duration" : "320"
+    }
+  },
+  "database" : {
+    "dbType" : "mysql",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "mysql8",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1793517221017,
+      "source" : "agent",
+      "available" : false,
+      "error" : "资源采集失败：Connect timed out"
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.connection.surge",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "params" : {
+      "concurrent-connections" : "900",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.connection.surge",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "params" : {
+      "concurrent-connections" : "900",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.connection.surge",
+    "groupKey" : "group-3",
+    "delaySeconds" : null,
+    "params" : {
+      "concurrent-connections" : "900",
+      "duration" : "60"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : true,
+    "load" : true,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1793517683389
+}

@@ -1,0 +1,20 @@
+{
+  "runId" : "tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000246_20261104_190040",
+  "enabled" : true,
+  "status" : "COMPLETED",
+  "targetIds" : [ "db-primary-01" ],
+  "metricIds" : [ "container.cpu.usage", "container.memory.usage", "db.connections.open_rate", "db.connections.usage", "db.rollback.rate", "db.sessions", "host.disk.usage", "host.process.stopped", "net.ping.loss", "net.ping.rtt", "net.qdisc.drop.percent", "net.qdisc.reorder.rate", "net.tcp.dsack.rate", "net.tcp.lost_retrans.rate", "net.tcp.rto.rate" ],
+  "containerName" : "mysql8",
+  "dbType" : "mysql",
+  "testStartAt" : 1793790040427,
+  "testEndAt" : 1793790300345,
+  "createdAt" : 1793790040427,
+  "updatedAt" : 1793790300508,
+  "expiresAt" : 1793791063729,
+  "queryStepSec" : 1,
+  "archiveEnabled" : true,
+  "archiveStatus" : "SUCCESS",
+  "deletedAt" : 0,
+  "dataCompleteness" : 1.0,
+  "warnings" : [ "Agent 心跳失败，压测不受影响" ]
+}

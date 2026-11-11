@@ -1,0 +1,20 @@
+{
+  "runId" : "tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000050_20261104_005709",
+  "enabled" : true,
+  "status" : "COMPLETED",
+  "targetIds" : [ "db-primary-01" ],
+  "metricIds" : [ "container.cpu.usage", "container.memory.usage", "db.connections.open_rate", "db.connections.usage", "db.rollback.rate", "db.sessions", "host.disk.usage", "host.process.stopped", "net.ping.loss", "net.ping.rtt", "net.qdisc.drop.percent", "net.qdisc.reorder.rate", "net.tcp.dsack.rate", "net.tcp.lost_retrans.rate", "net.tcp.rto.rate" ],
+  "containerName" : "mysql8",
+  "dbType" : "mysql",
+  "testStartAt" : 1793725032828,
+  "testEndAt" : 1793725208576,
+  "createdAt" : 1793725032828,
+  "updatedAt" : 1793725214758,
+  "expiresAt" : 1793725932828,
+  "queryStepSec" : 1,
+  "archiveEnabled" : true,
+  "archiveStatus" : "SUCCESS",
+  "deletedAt" : 0,
+  "dataCompleteness" : 1.0,
+  "warnings" : [ "Agent 会话创建失败，压测不受影响", "Agent 会话关闭失败，将由 TTL 自动回收" ]
+}

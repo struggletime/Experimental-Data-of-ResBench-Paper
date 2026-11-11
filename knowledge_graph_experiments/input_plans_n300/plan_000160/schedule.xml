@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testSuites>
+  <testSuite name="base-test-suite1">
+    <case id="7">
+      <description>Memory Load</description>
+      <planning>30</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="15">
+      <description>海量事务回滚</description>
+      <planning>61</planning>
+      <during>30</during>
+      <groupKey>group-2</groupKey>
+    </case>
+    <case id="3">
+      <description>Network Delay</description>
+      <planning>92</planning>
+      <during>30</during>
+      <groupKey>group-3</groupKey>
+    </case>
+  </testSuite>
+</testSuites>

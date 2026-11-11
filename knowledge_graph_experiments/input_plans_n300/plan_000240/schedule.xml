@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testSuites>
+  <testSuite name="base-test-suite1">
+    <case id="9">
+      <description>File Chmod</description>
+      <planning>57</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="3">
+      <description>Network Delay</description>
+      <planning>80</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="4">
+      <description>Network Reorder</description>
+      <planning>99</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="5">
+      <description>Network Duplicate</description>
+      <planning>103</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="11">
+      <description>Process Stop</description>
+      <planning>113</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+  </testSuite>
+</testSuites>

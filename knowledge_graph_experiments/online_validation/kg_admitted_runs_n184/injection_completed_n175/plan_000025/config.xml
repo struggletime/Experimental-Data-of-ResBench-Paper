@@ -1,0 +1,239 @@
+<?xml version='1.0' encoding='utf-8'?>
+<configuration>
+  <nodes>
+    <node>jdbc:mysql://192.168.199.209:3305/resbench_demo</node>
+  </nodes>
+  <reconnectOnConnectionFailure>true</reconnectOnConnectionFailure>
+  <isolation>TRANSACTION_READ_COMMITTED</isolation>
+  <batchsize>128</batchsize>
+  <scalefactor>100</scalefactor>
+  <data_cktype>ONLY_SPECIAL</data_cktype>
+  <terminals>200</terminals>
+  <faultCases>
+    <case>
+      <id>1</id>
+      <description>Process Stop</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>create</arg>
+        <arg>process</arg>
+        <arg>stop</arg>
+        <arg>--process-cmd</arg>
+        <arg>mysqld</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>destroy</arg>
+        <arg>process</arg>
+        <arg>stop</arg>
+        <arg>--process-cmd</arg>
+        <arg>mysqld</arg>
+      </recovery>
+      <check>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/bin/sh</arg>
+        <arg>-c</arg>
+        <arg>want='mysqld'
+total=0; stopped=0; i=0
+while [ "$i" -lt 5 ]; do
+  total=0; stopped=0
+  for d in /proc/[0-9]*; do
+    c=$(cat "$d/comm" 2&gt;/dev/null) || continue
+    [ "$c" = "$want" ] || continue
+    total=$((total + 1))
+    st=$(sed -n 's/^State:[[:space:]]*//p' "$d/status" 2&gt;/dev/null | cut -c1)
+    case "$st" in T|t) stopped=$((stopped + 1)) ;; esac
+  done
+  # 已经有 T 状态进程 → 注入生效；一个匹配进程都没有 → 目标写错，重试也没用
+  if [ "$stopped" -gt 0 ] || [ "$total" -eq 0 ]; then break; fi
+  i=$((i + 1)); sleep 1
+done
+enforced=false; [ "$stopped" -gt 0 ] &amp;&amp; enforced=true
+if [ "$total" -eq 0 ]; then
+  summary='没有找到 comm 等于目标名的进程（process-cmd 写错或进程已退出）'
+elif [ "$enforced" = true ]; then
+  summary='目标进程已进入 T 状态（SIGSTOP 生效）'
+else
+  summary='找到了目标进程，但没有一个处于 T 状态'
+fi
+printf '{"enforced": %s, "summary": "%s", "checks": [{"name": "target_process_in_T_state", "observed": "%s/%s", "expected": "&gt;=1 stopped of matched", "matched": %s}]}\n' \
+  "$enforced" "$summary" "$stopped" "$total" "$enforced"</arg>
+      </check>
+      <autoRecovery>0</autoRecovery>
+    </case>
+    <case>
+      <id>2</id>
+      <description>海量事务回滚</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection async="true">
+        <cmd>java</cmd>
+        <arg>-jar</arg>
+        <arg>/opt/DBChaos/DBChaos.jar</arg>
+        <arg>--db</arg>
+        <arg>mysql</arg>
+        <arg>log</arg>
+        <arg>massive_rollback</arg>
+        <arg>-duration</arg>
+        <arg>30000</arg>
+        <arg>-threads</arg>
+        <arg>16</arg>
+        <arg>-rate</arg>
+        <arg>0.8</arg>
+        <arg>-url</arg>
+        <arg>jdbc:mysql://192.168.199.209:3305/resbench_demo</arg>
+        <arg>-user</arg>
+        <arg>hancz</arg>
+        <arg>-password</arg>
+        <arg>REDACTED</arg>
+      </injection>
+      <check>
+        <cmd>java</cmd>
+        <arg>-jar</arg>
+        <arg>/opt/DBChaos/DBChaos.jar</arg>
+        <arg>--db</arg>
+        <arg>mysql</arg>
+        <arg>check</arg>
+        <arg>massive_rollback</arg>
+        <arg>-window-ms</arg>
+        <arg>2000</arg>
+        <arg>-min-delta</arg>
+        <arg>1</arg>
+        <arg>-url</arg>
+        <arg>jdbc:mysql://192.168.199.209:3305/resbench_demo</arg>
+        <arg>-user</arg>
+        <arg>hancz</arg>
+        <arg>-password</arg>
+        <arg>REDACTED</arg>
+      </check>
+      <autoRecovery>1</autoRecovery>
+    </case>
+    <case>
+      <id>3</id>
+      <description>Network Delay</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>create</arg>
+        <arg>network</arg>
+        <arg>delay</arg>
+        <arg>--time</arg>
+        <arg>200</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <recovery>
+        <cmd>/opt/chaosblade/blade</cmd>
+        <arg>destroy</arg>
+        <arg>network</arg>
+        <arg>delay</arg>
+        <arg>--time</arg>
+        <arg>200</arg>
+        <arg>--interface</arg>
+        <arg>ens17f0</arg>
+      </recovery>
+      <autoRecovery>1</autoRecovery>
+    </case>
+    <case>
+      <id>4</id>
+      <description>File Move</description>
+      <agents>
+        <agent>192.168.199.209:8000</agent>
+      </agents>
+      <injection>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/opt/chaosblade/blade</arg>
+        <arg>create</arg>
+        <arg>file</arg>
+        <arg>move</arg>
+        <arg>--filepath</arg>
+        <arg>/var/lib/mysql/client-cert.pem</arg>
+        <arg>--target</arg>
+        <arg>/var/lib/mysql/sys</arg>
+        <arg>--timeout</arg>
+        <arg>30</arg>
+      </injection>
+      <check>
+        <cmd>docker</cmd>
+        <arg>exec</arg>
+        <arg>mysql8</arg>
+        <arg>/bin/sh</arg>
+        <arg>-c</arg>
+        <arg>probe() {
+  out=$(stat -c '%d:%i' "$1" 2&gt;&amp;1)
+  if [ $? -eq 0 ]; then printf '%s' "$out"; return; fi
+  case "$out" in
+    *ermission?denied*) printf 'unreadable' ;;
+    *) printf 'absent' ;;
+  esac
+}
+src='/var/lib/mysql/client-cert.pem'
+dst_dir='/var/lib/mysql/sys'
+dst="${dst_dir%/}/$(basename "$src")"
+s=$(probe "$src")
+d=$(probe "$dst")
+if [ "$s" = unreadable ] || [ "$d" = unreadable ]; then
+  echo "self-check cannot read path (permission denied): src=$s dst=$d" &gt;&amp;2
+  exit 2
+fi
+dest=false; [ "$d" != absent ] &amp;&amp; dest=true
+moved=false; if [ "$d" != absent ] &amp;&amp; [ "$s" != "$d" ]; then moved=true; fi
+if [ "$moved" = true ]; then
+  summary='源位置已不是原对象，目标目录里存在移动后的对象'
+elif [ "$d" = absent ]; then
+  summary='目标目录里没有该对象，移动没有发生'
+else
+  summary='目标目录里没有该对象，源位置仍是原对象'
+fi
+printf '{"enforced": %s, "summary": "%s", "checks": [{"name": "dest_exists", "observed": "%s", "expected": "present", "matched": %s}, {"name": "src_is_not_the_moved_object", "observed": "%s", "expected": "absent or different inode", "matched": %s}]}\n' \
+  "$moved" "$summary" "$d" "$dest" "$s" "$moved"</arg>
+      </check>
+      <autoRecovery>1</autoRecovery>
+    </case>
+  </faultCases>
+  <works xml:base="../tpcc-worker-tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000025_20261104_002718.xml">
+    <work arrival="REGULAR">
+      <time>170</time>
+      <rate>100000</rate>
+      <weights>45,43,4,4,4</weights>
+      <testSuite>base-test-suite1</testSuite>
+    </work>
+  </works>
+  <transactiontypes>
+    <transactiontype>
+      <name>NewOrder</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Payment</name>
+    </transactiontype>
+    <transactiontype>
+      <name>OrderStatus</name>
+    </transactiontype>
+    <transactiontype>
+      <name>Delivery</name>
+    </transactiontype>
+    <transactiontype>
+      <name>StockLevel</name>
+    </transactiontype>
+  </transactiontypes>
+</configuration>

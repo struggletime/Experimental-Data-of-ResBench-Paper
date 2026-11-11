@@ -1,0 +1,86 @@
+{
+  "historyName" : "smallbank_DB-X-4gbSharedBuffer-500__smallbank-100k__08-disk-fill_20261108_230218",
+  "runId" : "smallbank_DB-X-4gbSharedBuffer-500__smallbank-100k__08-disk-fill_20261108_230218",
+  "testSuite" : "smallbank",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "DB-X-4gbSharedBuffer-500", "smallbank-100k", "08-disk-fill" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/matrix-DB-X-smallbank.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1794150138167,
+  "workload" : {
+    "name" : "smallbank",
+    "params" : {
+      "accountsNum" : "2000",
+      "terminals" : "200",
+      "duration" : "500"
+    }
+  },
+  "database" : {
+    "dbType" : "DB-X",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "DB-X",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1794150138167,
+      "source" : "agent",
+      "host" : {
+        "cpuCount" : 160,
+        "memoryBytes" : 540563824640
+      },
+      "container" : {
+        "available" : true,
+        "name" : "DB-X",
+        "image" : "enmotech/DB-X:5.0.3",
+        "status" : "running",
+        "cpuLimit" : 32.0,
+        "memoryLimitBytes" : 42949672960,
+        "cpuShares" : null,
+        "pidsLimit" : null
+      },
+      "available" : true
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.disk.fill",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "path" : "/mnt/nvme4n1/DB-X_data",
+      "percent" : "100",
+      "duration" : "120"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.disk.fill",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "path" : "/mnt/nvme4n1/DB-X_data",
+      "percent" : "100",
+      "duration" : "120"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.disk.fill",
+    "groupKey" : "group-3",
+    "delaySeconds" : null,
+    "planningSeconds" : null,
+    "params" : {
+      "path" : "/mnt/nvme4n1/DB-X_data",
+      "percent" : "100",
+      "duration" : "120"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : true,
+    "load" : true,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1794150783938
+}

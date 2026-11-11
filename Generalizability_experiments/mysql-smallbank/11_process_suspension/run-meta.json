@@ -1,0 +1,67 @@
+{
+  "historyName" : "smallbank_mysql-2gbSharedBuffer-1000__smallbank-100k__11-process-stop_20261101_150604",
+  "runId" : "smallbank_mysql-2gbSharedBuffer-1000__smallbank-100k__11-process-stop_20261101_150604",
+  "testSuite" : "smallbank",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "mysql-2gbSharedBuffer-1000", "smallbank-100k", "11-process-stop" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/matrix-mysql-smallbank.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1793516764512,
+  "workload" : {
+    "name" : "smallbank",
+    "params" : {
+      "accountsNum" : "2000",
+      "terminals" : "200",
+      "duration" : "320"
+    }
+  },
+  "database" : {
+    "dbType" : "mysql",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "mysql8",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1793516764512,
+      "source" : "agent",
+      "available" : false,
+      "error" : "资源采集失败：Connect timed out"
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.process.stop",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "params" : {
+      "process-cmd" : "mysqld",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.process.stop",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "params" : {
+      "process-cmd" : "mysqld",
+      "duration" : "60"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.process.stop",
+    "groupKey" : "group-3",
+    "delaySeconds" : null,
+    "params" : {
+      "process-cmd" : "mysqld",
+      "duration" : "60"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : true,
+    "load" : true,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1793517221006
+}

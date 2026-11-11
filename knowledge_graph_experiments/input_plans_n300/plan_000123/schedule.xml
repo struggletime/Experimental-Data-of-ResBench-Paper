@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testSuites>
+  <testSuite name="base-test-suite1">
+    <case id="11">
+      <description>Process Stop</description>
+      <planning>30</planning>
+      <during>30</during>
+      <groupKey>group-1</groupKey>
+    </case>
+    <case id="2">
+      <description>Network Packet Loss</description>
+      <planning>60</planning>
+      <during>30</during>
+      <groupKey>group-2</groupKey>
+    </case>
+  </testSuite>
+</testSuites>

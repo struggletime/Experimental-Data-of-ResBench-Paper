@@ -1,0 +1,80 @@
+{
+  "historyName" : "tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000105_20261103_050953",
+  "runId" : "tpcc_mysql-2gbSharedBuffer-1000__tpcc-10w__plan-000105_20261103_050953",
+  "testSuite" : "tpcc",
+  "dbKey" : null,
+  "orchestrationId" : null,
+  "source" : "ui",
+  "labels" : [ "batch", "mysql-2gbSharedBuffer-1000", "tpcc-10w", "plan-000105" ],
+  "note" : "resbench_batch.py: scripts/matrix-4groups/plan300-mysql-tpcc-main.yaml",
+  "autoTimingMode" : "fixed-time",
+  "createdAt" : 1793653793697,
+  "workload" : {
+    "name" : "tpcc",
+    "params" : {
+      "warehouses" : "100",
+      "concurrency" : "200",
+      "reload" : "false",
+      "duration" : "110"
+    }
+  },
+  "database" : {
+    "dbType" : "mysql",
+    "deploymentType" : "standalone",
+    "params" : { },
+    "containerName" : "mysql8",
+    "dockerized" : true,
+    "resources" : {
+      "collectedAt" : 1793653793697,
+      "source" : "agent",
+      "host" : {
+        "cpuCount" : 160,
+        "memoryBytes" : 540563824640
+      },
+      "container" : {
+        "available" : true,
+        "name" : "mysql8",
+        "image" : "mysql:8.0",
+        "status" : "running",
+        "cpuLimit" : 32.0,
+        "memoryLimitBytes" : 42949672960,
+        "cpuShares" : null,
+        "pidsLimit" : null
+      },
+      "available" : true
+    },
+    "connectionArchived" : false
+  },
+  "faults" : [ {
+    "nameKey" : "faultinject.fault.network.unorder",
+    "groupKey" : "group-1",
+    "delaySeconds" : null,
+    "planningSeconds" : 30,
+    "params" : {
+      "correlation" : "80",
+      "percent" : "50",
+      "time" : "500",
+      "gap" : "2",
+      "interface" : "ens17f0",
+      "duration" : "30"
+    }
+  }, {
+    "nameKey" : "faultinject.fault.disk.filechmod",
+    "groupKey" : "group-2",
+    "delaySeconds" : null,
+    "planningSeconds" : 60,
+    "params" : {
+      "filepath" : "/var/lib/mysql/resbench_demo",
+      "mark" : "000",
+      "duration" : "30"
+    }
+  } ],
+  "runOptions" : {
+    "monitorIntervalSec" : 1,
+    "create" : false,
+    "load" : false,
+    "execute" : true,
+    "reload" : false
+  },
+  "updatedAt" : 1793654011604
+}
